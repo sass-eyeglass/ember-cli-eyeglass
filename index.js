@@ -102,45 +102,55 @@ module.exports = {
           projectConfig = addon.parent.engineConfig(host.env, projectConfig);
         }
         // setup eyeglass for this project's configuration
-        var config = projectConfig.eyeglass || {};
-        config.annotation = "EyeglassCompiler: " + parentName;
-        if (!config.sourceFiles && !config.discover) {
-          config.sourceFiles = [inApp ? 'app.scss' : 'addon.scss'];
-        }
-        config.cssDir = cssDir;
-        config.sassDir = sassDir;
-        config.assets = ["public", "app"].concat(config.assets || []);
-        config.eyeglass = config.eyeglass || {}
-        config.eyeglass.httpRoot = config.eyeglass.httpRoot ||
-                                   config.httpRoot ||
-                                   projectConfig.rootURL;
-        config.assetsHttpPrefix = config.assetsHttpPrefix || getDefaultAssetHttpPrefix(addon.parent);
+        // the config is either an Object or an Array<Object>
+        // we cast the config to an Array<Object> for consistency
+        var configs = [].concat(projectConfig.eyeglass || {});
 
-        if (config.eyeglass.modules) {
-          config.eyeglass.modules =
-            config.eyeglass.modules.concat(localEyeglassAddons(addon.parent));
-        } else {
-          config.eyeglass.modules = localEyeglassAddons(addon.parent);
-        }
+        // we then iterate through the config(s) and construct the output trees
+        var trees = configs.map(function (config) {
+          config.annotation = "EyeglassCompiler: " + parentName;
+          if (!config.sourceFiles && !config.discover) {
+            config.sourceFiles = [inApp ? 'app.scss' : 'addon.scss'];
+          }
+          config.cssDir = cssDir;
+          config.sassDir = sassDir;
+          config.assets = ["public", "app"].concat(config.assets || []);
+          config.eyeglass = config.eyeglass || {}
+          config.eyeglass.httpRoot = config.eyeglass.httpRoot ||
+                                     config.httpRoot ||
+                                     projectConfig.rootURL;
+          config.assetsHttpPrefix = config.assetsHttpPrefix || getDefaultAssetHttpPrefix(addon.parent);
 
-        // If building an app, rename app.css to <project>.css per Ember conventions.
-        // Otherwise, we're building an addon, so rename addon.css to <name-of-addon>.css.
-        var originalGenerator = config.optionsGenerator;
-        config.optionsGenerator = function(sassFile, cssFile, sassOptions, compilationCallback) {
-          if (inApp) {
-            cssFile = cssFile.replace(/app\.css$/, addon.app.name + ".css");
+          if (config.eyeglass.modules) {
+            config.eyeglass.modules =
+              config.eyeglass.modules.concat(localEyeglassAddons(addon.parent));
           } else {
-            cssFile = cssFile.replace(/addon\.css$/, addon.parent.name + ".css");
+            config.eyeglass.modules = localEyeglassAddons(addon.parent);
           }
 
-          if (originalGenerator) {
-            originalGenerator(sassFile, cssFile, sassOptions, compilationCallback);
-          } else {
-            compilationCallback(cssFile, sassOptions);
-          }
-        };
+          // If building an app, rename app.css to <project>.css per Ember conventions.
+          // Otherwise, we're building an addon, so rename addon.css to <name-of-addon>.css.
+          var originalGenerator = config.optionsGenerator;
+          config.optionsGenerator = function(sassFile, cssFile, sassOptions, compilationCallback) {
+            if (inApp) {
+              cssFile = cssFile.replace(/app\.css$/, addon.app.name + ".css");
+            } else {
+              cssFile = cssFile.replace(/addon\.css$/, addon.parent.name + ".css");
+            }
 
-        tree = new EyeglassCompiler(tree, config);
+            if (originalGenerator) {
+              originalGenerator(sassFile, cssFile, sassOptions, compilationCallback);
+            } else {
+              compilationCallback(cssFile, sassOptions);
+            }
+          };
+
+          // pass the config and return our output tree
+          return new EyeglassCompiler(tree, config);
+        });
+
+        // merge all output trees
+        tree = merge(trees, { overwrite: true });
 
         // Ember CLI will ignore any non-CSS files returned in the tree for an
         // addon. So that non-CSS assets aren't lost, we'll store them in a
