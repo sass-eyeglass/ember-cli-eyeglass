@@ -108,7 +108,6 @@ module.exports = {
 
         // we then iterate through the config(s) and construct the output trees
         var trees = configs.map(function (config) {
-          console.log('[config]', config);
           config.annotation = "EyeglassCompiler: " + parentName;
           if (!config.sourceFiles && !config.discover) {
             config.sourceFiles = [inApp ? 'app.scss' : 'addon.scss'];
