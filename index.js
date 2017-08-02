@@ -6,6 +6,7 @@ var findHost = require("./lib/findHost");
 var funnel = require("broccoli-funnel");
 var merge = require("broccoli-merge-trees");
 var path = require("path");
+var cloneDeep = require('lodash.clonedeep');
 
 function isLazyEngine(addon) {
   if (addon.lazyLoading === true) {
@@ -113,7 +114,8 @@ module.exports = {
           projectConfig = addon.parent.engineConfig(host.env, projectConfig);
         }
         // setup eyeglass for this project's configuration
-        var config = projectConfig.eyeglass || {};
+        var config = projectConfig.eyeglass ? cloneDeep(projectConfig.eyeglass) : {};
+
         config.annotation = "EyeglassCompiler: " + parentName;
         if (!config.sourceFiles && !config.discover) {
           config.sourceFiles = [inApp ? 'app.scss' : 'addon.scss'];
