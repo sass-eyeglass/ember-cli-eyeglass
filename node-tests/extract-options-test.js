@@ -56,16 +56,10 @@ describe('extractOptions', function() {
 
     it('config/environment', function() {
       const eyeglass = { OMG: true, nested: { INNER: true } };
-      let didDeprecate = 0;
       const addon = {
         project: {
           config() {
             return { eyeglass };
-          }
-        },
-        ui: {
-          writeDeprecateLine() {
-            didDeprecate++;
           }
         },
         parent: { }
@@ -75,27 +69,17 @@ describe('extractOptions', function() {
         options: { }
       };
 
-      expect(didDeprecate).to.eql(0);
-      expect(extractConfig(host, addon), 'eyeglassConfig should be a deep clone').to.not.equal(eyeglass);
-      expect(didDeprecate).to.eql(1);
-      expect(extractConfig(host, addon).nested, 'eyeglassConfig should be a deep clone').to.not.equal(eyeglass.nested);
-      expect(extractConfig(host, addon)).to.deep.eql(eyeglass);
-      expect(extractConfig(host, addon).nested, 'eyeglassConfig should be a deep clone').to.eql(eyeglass.nested);
+      expect(() => extractConfig(host, addon)).to.throw(/is no longer supported/);
     });
 
     it('both config/environment and buildConfig', function() {
       const eyeglassENV = { OMG: true, nested: { INNER: true } };
       const eyeglassBUILD = { OMG: false, nested: { INNER: false } };
-      let didDeprecate = 0;
+
       const addon = {
         project: {
           config() {
             return { eyeglass: eyeglassENV };
-          }
-        },
-        ui: {
-          writeDeprecateLine() {
-            didDeprecate++;
           }
         },
         parent: { }
@@ -107,12 +91,7 @@ describe('extractOptions', function() {
         }
       };
 
-      expect(didDeprecate).to.eql(0);
-      expect(extractConfig(host, addon), 'eyeglassConfig should be a deep clone').to.not.equal(eyeglassENV);
-      expect(didDeprecate).to.eql(1);
-      expect(extractConfig(host, addon).nested, 'eyeglassConfig should be a deep clone').to.not.equal(eyeglassENV.nested);
-      expect(extractConfig(host, addon)).to.deep.eql(eyeglassENV);
-      expect(extractConfig(host, addon).nested, 'eyeglassConfig should be a deep clone').to.eql(eyeglassENV.nested);
+      expect(() => extractConfig(host, addon)).to.throw(/is no longer supported/);
     });
   });
 });

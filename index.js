@@ -8,6 +8,7 @@ const merge = require('broccoli-merge-trees');
 const path = require('path');
 const cloneDeep = require('lodash.clonedeep');
 const defaultsDeep = require('lodash.defaultsdeep');
+const SilentError = require('silent-error');
 
 function isLazyEngine(addon) {
   if (addon.lazyLoading === true) {
@@ -149,13 +150,9 @@ function extractConfig(host, addon) {
 
   let config;
   if (projectConfig.eyeglass) {
-    // TODO: WTF engines
-    if (process.env.EYEGLASS_DEPRECATE_ON_BROWSER_CONFIG) {
-      let from = addon.parent.root + '/config/environment';
-      let to = addon.parent.root + '/ember-cli-build';
-      addon.ui.writeDeprecateLine(`'eyeglass' configuration within config/environment is no longer supported\n  please move this configuration:\n\tfrom: '${from}' (or however configured) \n\tto:   '${to}' (or however configured)\n`);
-    }
-    config = cloneDeep(projectConfig.eyeglass);
+    let from = addon.parent.root + '/config/environment';
+    let to = addon.parent.root + '/ember-cli-build';
+    throw new SilentError(`'eyeglass' configuration within config/environment is no longer supported\n  please move this configuration:\n\tfrom: '${from}' (or however configured) \n\tto:   '${to}' (or however configured)\n`);
   } else {
     const isNestedAddon = typeof addon.parent.parent === 'object';
     // setup eyeglass for this project's configuration
