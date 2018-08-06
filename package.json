@@ -9,6 +9,7 @@
   "scripts": {
     "build": "ember build",
     "lint:js": "eslint .",
+    "lint:hbs": "ember-template-lint .",
     "start": "ember serve",
     "test": "ember test",
     "test:all": "ember try:each",
@@ -37,6 +38,7 @@
     "ember-cli-qunit": "^4.3.2",
     "ember-cli-shims": "^1.2.0",
     "ember-cli-sri": "^2.1.0",
+    "ember-cli-template-lint": "^1.0.0-beta.1",
     "ember-disable-prototype-extensions": "^1.1.2",
     "ember-engines": "^0.5.14",
     "ember-export-application-global": "^2.0.0",
