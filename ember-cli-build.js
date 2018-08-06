@@ -6,7 +6,8 @@ module.exports = function(defaults) {
   let app = new EmberAddon(defaults, {
     eyeglass: { omg: true, discover: true },
     'ember-cli-babel': {
-      throwUnlessParallelizable: true
+      // re-enable once we fix: https://github.com/ember-cli/babel-plugin-htmlbars-inline-precompile/issues/41
+      // throwUnlessParallelizable: true
     }
     // Add options here
   });
