@@ -14,5 +14,4 @@
 
 # ember-try
 /.node_modules.ember-try/
-
 /bin/install-test-addons.js
